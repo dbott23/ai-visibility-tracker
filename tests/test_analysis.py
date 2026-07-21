@@ -60,6 +60,23 @@ class TestCitations(unittest.TestCase):
         c = extract_citations("See https://a.com/x.")
         self.assertEqual(c[0]["url"], "https://a.com/x")
 
+    def test_provider_source_urls_included(self):
+        # Search-backed engines return sources out-of-band, not in the prose.
+        c = extract_citations("No links in this prose at all.",
+                              ["https://www.g2.com/categories/pm"])
+        self.assertEqual([x["domain"] for x in c], ["g2.com"])
+
+    def test_provider_urls_deduped_against_inline(self):
+        c = extract_citations("See https://a.com/x for more.",
+                              ["https://a.com/x", "https://b.com/y"])
+        self.assertEqual([x["url"] for x in c],
+                         ["https://a.com/x", "https://b.com/y"])
+
+    def test_analyze_response_surfaces_provider_domains(self):
+        r = analyze_response("Asana is popular.", "Asana", None, [],
+                             ["https://blog.example.com/pm"])
+        self.assertEqual(r["cited_domains"], ["blog.example.com"])
+
 
 class TestAnalyzeAndAggregate(unittest.TestCase):
     def test_analyze_response_full(self):

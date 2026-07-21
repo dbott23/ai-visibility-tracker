@@ -54,25 +54,41 @@ def share_of_voice(brand_count: int, competitor_counts: dict[str, int]) -> float
 _URL_RE = re.compile(r"https?://[^\s\)\]\}>\"']+")
 
 
-def extract_citations(text: str) -> list[dict]:
-    """Unique URLs in a response, in order, as {url, domain}."""
+def _as_citation(url: str) -> dict:
+    return {"url": url, "domain": urlparse(url).netloc.lower().removeprefix("www.")}
+
+
+def extract_citations(text: str, source_urls: list[str] | None = None) -> list[dict]:
+    """Unique URLs for a response, in order, as {url, domain}.
+
+    Inline URLs found in the prose come first, followed by any `source_urls` the
+    provider returned out-of-band (search-backed models list sources in a
+    structured field instead of in the text).
+    """
     seen, out = set(), []
     for m in _URL_RE.finditer(text):
         url = m.group(0).rstrip(".,;:!?")
         if url in seen:
             continue
         seen.add(url)
-        out.append({"url": url, "domain": urlparse(url).netloc.lower().removeprefix("www.")})
+        out.append(_as_citation(url))
+    for url in source_urls or []:
+        url = url.strip()
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        out.append(_as_citation(url))
     return out
 
 
 def analyze_response(text: str, brand: str, aliases: list[str] | None,
-                     competitors: list[str]) -> dict:
+                     competitors: list[str],
+                     source_urls: list[str] | None = None) -> dict:
     """Full per-response analysis record (engine/query metadata added by caller)."""
     mentions = find_mentions(text, brand, aliases)
     comp_counts = {c: len(find_mentions(text, c)) for c in competitors}
     first = mentions[0]["offset"] if mentions else None
-    citations = extract_citations(text)
+    citations = extract_citations(text, source_urls)
     return {
         "brand_mentioned": bool(mentions),
         "mention_count": len(mentions),
