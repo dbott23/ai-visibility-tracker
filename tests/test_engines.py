@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from engines import _provider_citations
+from engines import Answer, _provider_citations
 
 
 def _payload(**extra) -> dict:
@@ -57,6 +57,14 @@ class TestProviderCitations(unittest.TestCase):
     def test_malformed_entries_ignored(self):
         p = _payload(citations=[None, {}, {"title": "no url"}, "https://ok.com"])
         self.assertEqual(_provider_citations(p), ["https://ok.com"])
+
+
+class TestAnswer(unittest.TestCase):
+    def test_not_truncated_by_default(self):
+        self.assertFalse(Answer("text", []).truncated)
+
+    def test_truncation_flag_carried(self):
+        self.assertTrue(Answer("text", [], True).truncated)
 
 
 if __name__ == "__main__":

@@ -102,7 +102,16 @@ async def main() -> None:
                     rec.update({
                         "brand": name, "engine": engine, "query": query,
                         "response_snippet": answer.text[:400],
+                        # A truncated reply may simply not have reached the
+                        # brand yet, so a False `brand_mentioned` on this row
+                        # is inconclusive rather than a real absence.
+                        "response_truncated": answer.truncated,
                     })
+                    if answer.truncated and not rec["brand_mentioned"]:
+                        Actor.log.warning(
+                            f"{engine} reply hit the token limit before mentioning "
+                            f"{name} ({query!r}) - treat this row as inconclusive."
+                        )
                     records.append(rec)
                     await Actor.push_data(rec)
                     # Commit the check as done before charging for it. A

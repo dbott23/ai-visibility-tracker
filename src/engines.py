@@ -28,15 +28,37 @@ MOCK_RESPONSE = (
 )
 
 
+# Verbose models answer a "best tool for X" query as a listicle with a long
+# paragraph per entry. Left unguided they burn the token budget describing the
+# first one or two products and get cut off, so brands further down the list
+# look absent when they were simply never reached — a false "not mentioned"
+# reading, which is the worst possible error for a visibility tracker. Ask for
+# the full slate of names up front and keep the per-item prose short.
+SYSTEM_PROMPT = (
+    "Answer as you normally would for a user researching this question. "
+    "Name every product or company you would actually recommend, listing them "
+    "in your genuine order of preference, and keep each description to one or "
+    "two sentences so the full list fits in your reply."
+)
+
+# Headroom for the whole list. Truncation is still detected and surfaced.
+MAX_TOKENS = 1600
+
+
 class Answer(NamedTuple):
     """An engine's reply: prose plus the URLs the provider cited out-of-band.
 
     Search-backed models (notably perplexity/sonar) return their sources in a
     structured field rather than inline in the prose, so extracting URLs from
     `text` alone misses them entirely.
+
+    `truncated` flags a reply the model cut short at the token limit: any brand
+    it had not reached yet is missing for mechanical reasons, so a "not
+    mentioned" result on such a row is unreliable rather than meaningful.
     """
     text: str
     source_urls: list[str]
+    truncated: bool = False
 
 
 def _provider_citations(payload: dict) -> list[str]:
@@ -80,12 +102,17 @@ def ask_engine(engine: str, query: str, *, brand: str = "", timeout: float = 90.
         headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"},
         json={
             "model": model,
-            "messages": [{"role": "user", "content": query}],
-            "max_tokens": 900,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": query},
+            ],
+            "max_tokens": MAX_TOKENS,
         },
         timeout=timeout,
     )
     resp.raise_for_status()
     payload = resp.json()
-    text = payload["choices"][0]["message"]["content"] or ""
-    return Answer(text, _provider_citations(payload))
+    choice = (payload.get("choices") or [{}])[0]
+    text = (choice.get("message") or {}).get("content") or ""
+    return Answer(text, _provider_citations(payload),
+                  choice.get("finish_reason") == "length")
