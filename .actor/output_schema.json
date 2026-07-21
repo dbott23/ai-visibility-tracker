@@ -1,0 +1,90 @@
+{
+    "actorSpecification": 1,
+    "fields": {
+        "brand": {
+            "title": "Brand",
+            "type": "string",
+            "description": "Brand name as provided in the input."
+        },
+        "engine": {
+            "title": "AI engine",
+            "type": "string",
+            "description": "Engine that produced this result (chatgpt, perplexity, gemini, claude)."
+        },
+        "query": {
+            "title": "Query",
+            "type": "string",
+            "description": "The buyer-intent query that was sent to the engine."
+        },
+        "brand_mentioned": {
+            "title": "Brand mentioned",
+            "type": "boolean",
+            "description": "Whether the brand appeared anywhere in the response."
+        },
+        "mention_count": {
+            "title": "Mention count",
+            "type": "integer",
+            "description": "Number of times the brand (or an alias) appeared in the response."
+        },
+        "position_score": {
+            "title": "Position score",
+            "type": "integer",
+            "description": "1–10: how early the brand was first mentioned. 10 = first, 1 = last, 0 = not mentioned."
+        },
+        "share_of_voice": {
+            "title": "Share of voice",
+            "type": "number",
+            "description": "Brand mentions ÷ (brand + all competitor mentions). 0.0–1.0."
+        },
+        "competitor_mentions": {
+            "title": "Competitor mentions",
+            "type": "object",
+            "description": "Map of competitor name → mention count for all competitors in the input."
+        },
+        "citations": {
+            "title": "Citations",
+            "type": "array",
+            "description": "URLs cited by the AI, as {url, domain} objects."
+        },
+        "cited_domains": {
+            "title": "Cited domains",
+            "type": "array",
+            "description": "Deduplicated list of domains cited by the AI in this response."
+        },
+        "response_snippet": {
+            "title": "Response snippet",
+            "type": "string",
+            "description": "First 400 characters of the AI's response."
+        },
+        "response_truncated": {
+            "title": "Response truncated",
+            "type": "boolean",
+            "description": "True if the engine hit the token limit. A missing brand on a truncated row is inconclusive."
+        }
+    },
+    "views": {
+        "overview": {
+            "title": "Visibility checks",
+            "transformation": {
+                "fields": [
+                    "brand", "engine", "query",
+                    "brand_mentioned", "mention_count",
+                    "position_score", "share_of_voice", "cited_domains"
+                ]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "brand":          { "label": "Brand" },
+                    "engine":         { "label": "Engine" },
+                    "query":          { "label": "Query" },
+                    "brand_mentioned":{ "label": "Mentioned?" },
+                    "mention_count":  { "label": "Mentions" },
+                    "position_score": { "label": "Position (1–10)" },
+                    "share_of_voice": { "label": "Share of Voice" },
+                    "cited_domains":  { "label": "Cited Domains" }
+                }
+            }
+        }
+    }
+}
