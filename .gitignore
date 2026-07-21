@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Env / secrets — never commit keys
+.env
+*.env
+storage/
+
+# OS
+.DS_Store

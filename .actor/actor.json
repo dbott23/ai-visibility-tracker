@@ -1,0 +1,26 @@
+{
+    "actorSpecification": 1,
+    "name": "ai-brand-visibility-tracker",
+    "title": "AI Brand Visibility Tracker — Multi-Brand + Trends",
+    "description": "Track how ChatGPT, Perplexity, Gemini & Claude talk about your brands. Multi-brand batches, share of voice, citations, and week-over-week trend deltas. No API keys needed.",
+    "version": "0.1",
+    "buildTag": "latest",
+    "input": "./input_schema.json",
+    "dockerfile": "../Dockerfile",
+    "storages": {
+        "dataset": {
+            "actorSpecification": 1,
+            "views": {
+                "overview": {
+                    "title": "Visibility checks",
+                    "transformation": {
+                        "fields": ["brand", "engine", "query", "brand_mentioned",
+                                   "mention_count", "position_score",
+                                   "share_of_voice", "cited_domains"]
+                    },
+                    "display": {"component": "table"}
+                }
+            }
+        }
+    }
+}

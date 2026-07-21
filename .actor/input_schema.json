@@ -1,0 +1,45 @@
+{
+    "title": "AI Brand Visibility Tracker input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "brands": {
+            "title": "Brands",
+            "type": "array",
+            "description": "One or more brands to track. Each: {\"name\": \"Asana\", \"aliases\": [], \"competitors\": [\"Trello\", \"Monday.com\"]}. Batch as many brands as you like in one run.",
+            "editor": "json",
+            "prefill": [
+                {"name": "Asana", "aliases": [], "competitors": ["Trello", "Monday.com", "ClickUp"]}
+            ]
+        },
+        "queries": {
+            "title": "Buyer queries",
+            "type": "array",
+            "description": "Questions your customers ask AI assistants (e.g. \"best project management tool for small teams\").",
+            "editor": "stringList",
+            "prefill": ["best project management tool for small teams",
+                        "what project management software should a startup use"]
+        },
+        "engines": {
+            "title": "AI engines",
+            "type": "array",
+            "description": "Which engines to check.",
+            "editor": "select",
+            "items": {"type": "string", "enum": ["chatgpt", "perplexity", "gemini", "claude"]},
+            "default": ["chatgpt", "perplexity", "gemini"]
+        },
+        "trackTrends": {
+            "title": "Track trends (week-over-week deltas)",
+            "type": "boolean",
+            "description": "Store this run's summary and report deltas vs your previous run — schedule weekly for automatic trend reports.",
+            "default": true
+        },
+        "trendKey": {
+            "title": "Trend series key",
+            "type": "string",
+            "description": "Optional label to keep separate trend series (e.g. per client).",
+            "editor": "textfield"
+        }
+    },
+    "required": ["brands", "queries"]
+}
