@@ -170,3 +170,15 @@ Yes — set a unique `trendKey` per client (e.g. `"client-acme"`, `"client-beta"
 
 **What's the difference between `mention_count` and `position_score`?**
 `mention_count` is how many times the brand appeared in the response. `position_score` (1–10) measures *where* it first appeared — being named first scores 10, being buried at the end scores 1.
+
+---
+
+## More from dbott23
+
+| Actor | What it does |
+|---|---|
+| [AI Citation Auditor](https://apify.com/dbott23/ai-citation-auditor) | Check if your website is cited by ChatGPT, Perplexity, and Gemini |
+| [App Store & Google Play Reviews Scraper](https://apify.com/dbott23/appstore-reviews-scraper) | Export iOS and Android app reviews by keyword or app ID |
+| [Trustpilot Reviews Scraper](https://apify.com/dbott23/trustpilot-reviews-scraper) | Export Trustpilot reviews to CSV or JSON — no API key needed |
+| [B2B Reviews Scraper](https://apify.com/dbott23/b2b-reviews-scraper) | Pull reviews from G2, Capterra, and Trustpilot in one run |
+| [Bluesky Posts Scraper](https://apify.com/dbott23/bluesky-posts-scraper) | Search and export Bluesky posts by keyword or user profile |
