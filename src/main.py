@@ -1,7 +1,7 @@
 """AI Brand Visibility Tracker — Apify actor entry point.
 
 Multi-brand batch x queries x engines, with run-over-run trend deltas kept in a
-named key-value store. Charges pay-per-event per (brand, query, engine) check.
+named key-value store. Charges per dataset item via apify-default-dataset-item.
 """
 from __future__ import annotations
 
@@ -17,9 +17,8 @@ TREND_STORE = "ai-visibility-trends"
 
 # Progress lives in the run's default key-value store, which survives a
 # migration. Without it, a migrated run restarts main() from scratch: every
-# check is re-run (duplicate dataset rows, double API spend) and every
-# pay-per-event charge fires a second time for work the customer already paid
-# for. Apify migrates runs routinely, so this is a normal path, not an edge case.
+# check is re-run (duplicate dataset rows, double API spend, double charges).
+# Apify migrates runs routinely, so this is a normal path, not an edge case.
 CHECKPOINT_KEY = "CHECKPOINT"
 
 
@@ -81,9 +80,6 @@ async def main() -> None:
                 f"Resuming after migration: {len(done)} of "
                 f"{len(brands) * len(queries) * len(engines)} checks already done."
             )
-        else:
-            # Charged once per run; on resume the original run already paid.
-            await Actor.charge("actor-start")
 
         for brand in brands:
             name = brand["name"]
@@ -114,13 +110,8 @@ async def main() -> None:
                         )
                     records.append(rec)
                     await Actor.push_data(rec)
-                    # Commit the check as done before charging for it. A
-                    # migration in the gap then costs us one uncharged check
-                    # rather than billing the customer twice for one result —
-                    # the safe direction to fail on a monetized Actor.
                     done.add(check_id)
                     await save_checkpoint()
-                    await Actor.charge("visibility-check")
 
         summary = aggregate(records)
 
